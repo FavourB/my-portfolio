@@ -1,5 +1,8 @@
+import plugin from 'tailwindcss/plugin';
+import tailwindcssAnimate from 'tailwindcss-animate';
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const tailwindConfig = {
   darkMode: ["class"],
   content: [
     './pages/**/*.{js,jsx,ts,tsx}',
@@ -64,18 +67,10 @@ module.exports = {
       },
       keyframes: {
         'border-trace': {
-          '0%, 100%': { 
-            clipPath: 'inset(0 0 100% 0)' 
-          },
-          '25%': { 
-            clipPath: 'inset(0 0 0 100%)' 
-          },
-          '50%': { 
-            clipPath: 'inset(100% 0 0 0)' 
-          },
-          '75%': { 
-            clipPath: 'inset(0 100% 0 0)' 
-          }
+          '0%, 100%': { clipPath: 'inset(0 0 100% 0)' },
+          '25%': { clipPath: 'inset(0 0 0 100%)' },
+          '50%': { clipPath: 'inset(100% 0 0 0)' },
+          '75%': { clipPath: 'inset(0 100% 0 0)' },
         },
         'accordion-down': {
           from: { height: 0 },
@@ -96,32 +91,24 @@ module.exports = {
           },
         },
         'fade-in': {
-          '0%': {
-            opacity: '0',
-          },
-          '100%': {
-            opacity: '1',
-          },
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
         'slide-in-right': {
-          '0%': {
-            transform: 'translateX(100%)',
-            opacity: '0',
-          },
-          '100%': {
-            transform: 'translateX(0)',
-            opacity: '1',
-          },
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
         },
         'slide-in-left': {
-          '0%': {
-            transform: 'translateX(-100%)',
-            opacity: '0',
-          },
-          '100%': {
-            transform: 'translateX(0)',
-            opacity: '1',
-          },
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'slow-spin': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        'reverse-slow-spin': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(-360deg)' },
         },
       },
       animation: {
@@ -131,7 +118,9 @@ module.exports = {
         'fade-in': 'fade-in 0.5s ease-out',
         'slide-in-right': 'slide-in-right 0.5s ease-out',
         'slide-in-left': 'slide-in-left 0.5s ease-out',
-        'border-trace': 'border-trace 5s linear infinite'
+        'border-trace': 'border-trace 5s linear infinite',
+        'slow-spin': 'slow-spin 30s linear infinite',
+        'reverse-slow-spin': 'reverse-slow-spin 35s linear infinite',
       },
       spacing: {
         '18': '4.5rem',
@@ -139,23 +128,23 @@ module.exports = {
         '30': '7.5rem',
       },
       transitionProperty: {
-        'height': 'height',
-        'spacing': 'margin, padding',
+        height: 'height',
+        spacing: 'margin, padding',
       },
       transitionDuration: {
-        '250': '250ms',
-        '350': '350ms',
-        '400': '400ms',
+        250: '250ms',
+        350: '350ms',
+        400: '400ms',
       },
       transitionTimingFunction: {
         'in-expo': 'cubic-bezier(0.95, 0.05, 0.795, 0.035)',
         'out-expo': 'cubic-bezier(0.19, 1, 0.22, 1)',
       },
       screens: {
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
         '2xl': '1536px',
       },
       zIndex: {
@@ -168,12 +157,15 @@ module.exports = {
     },
   },
   plugins: [
-    require ('tailwindcss-animate'),
-    function({ addUtilities }) {
+    tailwindcssAnimate,
+    plugin(function ({ addUtilities }) {
       addUtilities({
-        '.animate-border-trace': {
-          animation: 'border-trace 5s linear infinite'
-        }
-      })}
+        '.animate-border-trace': { animation: 'border-trace 5s linear infinite' },
+        '.animate-slow-spin': { animation: 'slow-spin 30s linear infinite' },
+        '.animate-reverse-slow-spin': { animation: 'reverse-slow-spin 35s linear infinite' },
+      });
+    }),
   ],
 };
+
+export default tailwindConfig;

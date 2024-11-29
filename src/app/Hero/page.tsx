@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useTransform, useViewportScroll } from 'framer-motion';
 import { 
   Download, 
   Send, 
@@ -10,6 +10,7 @@ import {
   X 
 } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // Typed Modal Component
 interface ModalProps {
@@ -103,52 +104,60 @@ const SocialLinks = () => {
     </div>
   );
 };
-
 export default function HeroSection() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+  const { scrollYProgress } = useViewportScroll();
+
+  // Create parallax effects
+  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const backgroundRotate = useTransform(scrollYProgress, [0, 1], [0, 10]);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) return null;
+  const handleImageClick = () => {
+    router.push('/about');
+  };
 
+
+  if (!isMounted) return null;
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Modern Gradient Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <motion.div 
-          className="absolute -top-1/4 -left-1/4 w-[150%] h-[150%] bg-gradient-to-br 
-            from-primary/10 via-primary/5 to-transparent 
-            dark:from-primary/20 dark:via-primary/10 dark:to-transparent 
-            rotate-6 blur-3xl opacity-50"
-          initial={{ rotate: 0 }}
-          animate={{ 
-            rotate: [6, -6, 6],
-            transition: {
-              duration: 10,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }
-          }}
+      {/* Dynamic Moving Background */}
+      <motion.div 
+        className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+        style={{
+          y: backgroundY,
+          rotate: backgroundRotate,
+        }}
+      >
+        {/* Multiple Gradient Layers */}
+        <div 
+          className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] 
+          bg-gradient-to-r 
+          from-primary/10 
+          via-blue-100/20 
+          to-purple-100/10 
+          dark:from-primary/20 
+          dark:via-blue-900/20 
+          dark:to-purple-900/10 
+          opacity-50 blur-3xl animate-slow-spin"
         />
-        <motion.div 
-          className="absolute -bottom-1/4 -right-1/4 w-[150%] h-[150%] bg-gradient-to-tl 
-            from-blue-100/20 via-blue-50/10 to-transparent 
-            dark:from-blue-900/20 dark:via-blue-900/10 dark:to-transparent 
-            -rotate-6 blur-3xl opacity-50"
-          initial={{ rotate: 0 }}
-          animate={{ 
-            rotate: [-6, 6, -6],
-            transition: {
-              duration: 12,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }
-          }}
+        <div 
+          className="absolute -bottom-1/2 -right-1/2 w-[200%] h-[200%] 
+          bg-gradient-to-l 
+          from-primary/5 
+          via-green-100/20 
+          to-cyan-100/10 
+          dark:from-primary/10 
+          dark:via-green-900/20 
+          dark:to-cyan-900/10 
+          opacity-40 blur-3xl animate-reverse-slow-spin"
         />
-      </div>
+      </motion.div>
 
       <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -206,7 +215,7 @@ export default function HeroSection() {
               </button>
               
               <a 
-                href="/resume.pdf" 
+                href="/FAVOUR BAWA - RESUME.pdf" 
                 download
                 className="flex-1 inline-flex items-center justify-center 
                 border-2 border-primary text-primary px-6 py-3 
@@ -220,16 +229,23 @@ export default function HeroSection() {
             <SocialLinks />
           </motion.div>
 
-          {/* Profile Image */}
-          <motion.div
+        {/* Profile Image */}
+        <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             className="relative flex items-center justify-center z-20"
           >
-            <div className="w-full max-w-md aspect-square relative group">
+            <div 
+              className="w-full max-w-md aspect-square relative group cursor-pointer"
+              onClick={handleImageClick}
+            >
               <div className="absolute -inset-2 bg-primary/20 dark:bg-primary/10 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-all duration-300"></div>
-              <div className="relative z-10 rounded-full overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
+              <motion.div 
+                className="relative z-10 rounded-full overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Image 
                   src="/placeholder.png"
                   alt="Favour Bawa"
@@ -237,11 +253,17 @@ export default function HeroSection() {
                   height={500}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-              </div>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                  <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-lg font-semibold">
+                    View About Me
+                  </span>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </div>
+
 
       {/* Enhanced Modal */}
       <AnimatePresence>
