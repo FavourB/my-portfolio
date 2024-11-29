@@ -1,26 +1,112 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Download, 
+  Send, 
+  Linkedin, 
+  Github, 
+  Twitter, 
+  ArrowRight, 
+  X 
+} from 'lucide-react';
 import Image from 'next/image';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
-import { useInView } from 'react-intersection-observer';
-import Modal from './Modal';
 
-export default function Hero() {
-  const [isMounted, setIsMounted] = useState(false);
+// Typed Modal Component
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}
 
-  const { scrollY } = useScroll();
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  });
+const EnhancedModal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
 
+  return (
+    <motion.div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+        >
+          <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+        </button>
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Enhanced Social Links Component
+const SocialLinks = () => {
+  const socialLinks = [
+    { 
+      Icon: Linkedin, 
+      href: "https://www.linkedin.com/in/favourbawa", 
+      color: "bg-blue-100 dark:bg-blue-900/30",
+      hoverColor: "hover:bg-blue-200 dark:hover:bg-blue-900/50",
+      iconColor: "text-blue-600 dark:text-blue-300",
+      name: "LinkedIn"
+    },
+    { 
+      Icon: Github, 
+      href: "https://github.com/favourbawa", 
+      color: "bg-gray-100 dark:bg-gray-900/30",
+      hoverColor: "hover:bg-gray-200 dark:hover:bg-gray-900/50",
+      iconColor: "text-gray-800 dark:text-gray-300",
+      name: "GitHub"
+    },
+    { 
+      Icon: Twitter, 
+      href: "https://twitter.com/favourbawa", 
+      color: "bg-sky-100 dark:bg-sky-900/30",
+      hoverColor: "hover:bg-sky-200 dark:hover:bg-sky-900/50",
+      iconColor: "text-sky-600 dark:text-sky-300",
+      name: "Twitter"
+    }
+  ];
+
+  return (
+    <div className="flex space-x-4 mt-6">
+      {socialLinks.map(({ Icon, href, color, hoverColor, iconColor, name }) => (
+        <motion.a 
+          key={href} 
+          href={href} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className={`
+            ${color} ${hoverColor} 
+            rounded-full p-3 flex items-center justify-center 
+            transition-all duration-300 
+            hover:scale-110 hover:shadow-lg group
+            relative overflow-hidden
+          `}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          aria-label={name}
+        >
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-br from-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          />
+          <Icon className={`w-6 h-6 ${iconColor} relative z-10`} />
+        </motion.a>
+      ))}
+    </div>
+  );
+};
+
+export default function HeroSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Smooth parallax effect
-  const imageY = useTransform(scrollY, [0, 500], [0, 50]);
-  const smoothImageY = useSpring(imageY, { stiffness: 100, damping: 30 });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -29,123 +115,200 @@ export default function Hero() {
   if (!isMounted) return null;
 
   return (
-    <>
-      <section
-        ref={ref}
-        className="relative min-h-[100vh] flex items-center py-12 md:py-0 overflow-hidden"
-      >
-        {/* Background Design */}
-        <div className="absolute inset-0 z-0">
-          <div
-            className="absolute inset-0 bg-primary"
-            style={{
-              clipPath: 'polygon(0 0, 45% 0, 35% 100%, 0 100%)',
-            }}
-          />
-          <div
-            className="absolute inset-0 bg-background dark:bg-gray-900 transition-colors duration-300"
-            style={{
-              clipPath: 'polygon(45% 0, 100% 0, 100% 100%, 35% 100%)',
-            }}
-          />
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Modern Gradient Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <motion.div 
+          className="absolute -top-1/4 -left-1/4 w-[150%] h-[150%] bg-gradient-to-br 
+            from-primary/10 via-primary/5 to-transparent 
+            dark:from-primary/20 dark:via-primary/10 dark:to-transparent 
+            rotate-6 blur-3xl opacity-50"
+          initial={{ rotate: 0 }}
+          animate={{ 
+            rotate: [6, -6, 6],
+            transition: {
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }
+          }}
+        />
+        <motion.div 
+          className="absolute -bottom-1/4 -right-1/4 w-[150%] h-[150%] bg-gradient-to-tl 
+            from-blue-100/20 via-blue-50/10 to-transparent 
+            dark:from-blue-900/20 dark:via-blue-900/10 dark:to-transparent 
+            -rotate-6 blur-3xl opacity-50"
+          initial={{ rotate: 0 }}
+          animate={{ 
+            rotate: [-6, 6, -6],
+            transition: {
+              duration: 12,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }
+          }}
+        />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 md:px-6 lg:px-8 min-h-screen flex items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Content Section */}
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col items-center lg:items-start z-20"
+          >
+            <motion.h1 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-center lg:text-left 
+              text-gray-900 dark:text-white"
+            >
+              Favour <span className="text-primary">Bawa</span>
+            </motion.h1>
+
+            <motion.h2
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="text-2xl md:text-3xl font-semibold 
+              text-gray-700 dark:text-gray-200 mb-6 text-center lg:text-left"
+            >
+              Frontend Developer
+            </motion.h2>
+
+            <motion.p
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="text-base md:text-lg text-center lg:text-left 
+              text-gray-700 dark:text-gray-300 max-w-xl mb-8"
+            >
+              Crafting elegant, user-centric web experiences that blend creativity with cutting-edge technology.
+            </motion.p>
+
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="flex flex-col sm:flex-row gap-4 w-full max-w-xl"
+            >
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="flex-1 inline-flex items-center justify-center 
+                bg-primary text-white px-6 py-3 rounded-full 
+                hover:bg-primary/90 transition-colors group"
+              >
+                Get In Touch
+                <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              <a 
+                href="/resume.pdf" 
+                download
+                className="flex-1 inline-flex items-center justify-center 
+                border-2 border-primary text-primary px-6 py-3 
+                rounded-full hover:bg-primary/10 transition-colors group"
+              >
+                Download CV
+                <Download className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+              </a>
+            </motion.div>
+
+            <SocialLinks />
+          </motion.div>
+
+          {/* Profile Image */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="relative flex items-center justify-center z-20"
+          >
+            <div className="w-full max-w-md aspect-square relative group">
+              <div className="absolute -inset-2 bg-primary/20 dark:bg-primary/10 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-all duration-300"></div>
+              <div className="relative z-10 rounded-full overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
+                <Image 
+                  src="/placeholder.png"
+                  alt="Favour Bawa"
+                  width={500}
+                  height={500}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            </div>
+          </motion.div>
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="container relative z-10 mx-auto px-4 md:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Image with Effects */}
-            <motion.div
-              className="relative order-2 lg:order-1 group"
-              initial={{ opacity: 0, x: -50 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            >
-              <div className="relative aspect-square w-full max-w-[500px] mx-auto rounded-full overflow-hidden shadow-xl">
-                <motion.div
-                  style={{ y: smoothImageY }}
-                  className="relative h-full w-full"
-                >
-                  {/* Image layer */}
-                  <Image
-                    src="/placeholder.png"
-                    alt="Favour Bawa"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105 rounded-full"
-                    priority
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </motion.div>
+      {/* Enhanced Modal */}
+      <AnimatePresence>
+        <EnhancedModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)}
+        >
+          <div className="p-8 md:p-12">
+            <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-white">
+              Let&apos;s Connect
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Interested in collaboration or have a project in mind? I&apos;m always open to exciting opportunities.
+            </p>
+            
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Name
+                </label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 
+                  rounded-lg bg-white dark:bg-gray-900 
+                  text-gray-900 dark:text-white
+                  focus:ring-2 focus:ring-primary/50 transition-colors"
+                  placeholder="Your Name"
+                />
               </div>
-            </motion.div>
-
-            {/* Hero Text */}
-            <motion.div
-              className="order-1 lg:order-2 lg:pl-12"
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <div className="relative mb-6 md:mb-8">
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
-                  <motion.span
-                    className="inline-flex items-center"
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={inView ? { x: 0, opacity: 1 } : {}}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                  >
-                    <span className="hidden md:block w-8 h-[2px] bg-primary mr-4" />
-                    I&apos;M{' '}
-                    <span className="text-primary ml-5">  FAVOUR BAWA.</span>
-                  </motion.span>
-                </h1>
-                <motion.h2
-                  className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-600 dark:text-gray-400"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={inView ? { y: 0, opacity: 1 } : {}}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                >
-                  FRONTEND DEVELOPER
-                </motion.h2>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email
+                </label>
+                <input 
+                  type="email" 
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 
+                  rounded-lg bg-white dark:bg-gray-900 
+                  text-gray-900 dark:text-white
+                  focus:ring-2 focus:ring-primary/50 transition-colors"
+                  placeholder="you@example.com"
+                />
               </div>
-
-              <motion.p
-                className="text-base md:text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl"
-                initial={{ y: 20, opacity: 0 }}
-                animate={inView ? { y: 0, opacity: 1 } : {}}
-                transition={{ duration: 0.6, delay: 0.5 }}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Message
+                </label>
+                <textarea 
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 
+                  rounded-lg bg-white dark:bg-gray-900 
+                  text-gray-900 dark:text-white
+                  focus:ring-2 focus:ring-primary/50 transition-colors"
+                  placeholder="Your message..."
+                />
+              </div>
+              <button 
+                type="submit"
+                className="w-full bg-primary text-white py-3 rounded-lg 
+                hover:bg-primary/90 transition-colors flex items-center justify-center"
               >
-                I&apos;m a passionate web designer & front‑end developer focused on
-                crafting clean & user‑friendly experiences, I am committed to
-                building excellent software that improves the lives of those
-                around me.
-              </motion.p>
-
-              <motion.button
-                onClick={() => setIsModalOpen(true)} // Fix: Correct onClick handler to toggle modal
-                className="group inline-flex items-center bg-primary text-white dark:text-white 
-                 text-base md:text-lg font-semibold relative px-6 py-3 
-                 rounded-full hover:bg-primary/90 dark:hover:bg-primary/80 
-                 transition-colors focus:outline-none focus:ring-2 
-                 focus:ring-primary/50 dark:focus:ring-primary/40"
-                whileHover={{ x: 10 }}
-                whileTap={{ scale: 0.98 }}
-                initial={{ opacity: 0 }}
-                animate={inView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                <span className="relative z-10 flex items-center">
-                  MORE ABOUT ME
-                  <ArrowRight className="ml-2 w-4 md:w-5 h-4 md:h-5 transition-transform 
-                              group-hover:translate-x-1" />
-                </span>
-              </motion.button>
-            </motion.div>
+                Send Message
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </button>
+            </form>
           </div>
-        </div>
-      </section>
-
-      {/* Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </>
+        </EnhancedModal>
+      </AnimatePresence>
+    </div>
   );
 }

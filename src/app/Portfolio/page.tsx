@@ -82,7 +82,7 @@ export default function Portfolio() {
   return (
     <section 
       id="portfolio" 
-      className="py-20 overflow-hidden relative" 
+      className="py-20 overflow-hidden relative min-h-screen pb-24"
       ref={sectionRef}
     >
       <div className="container mx-auto px-4 max-w-7xl">

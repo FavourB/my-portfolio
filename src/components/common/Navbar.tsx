@@ -1,10 +1,10 @@
 'use client'
-import { useTheme } from '@/context/ThemeContext'
-import { useActiveSection } from '@/context/ActiveSectionContext'
-import { NavItem } from './NavItem'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Home, User, Briefcase, Mail, Moon, Sun } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useTheme } from '@/context/ThemeContext'
+import { useActiveSection } from '@/context/ActiveSectionContext'
+import { NavItem } from './NavItem' 
 
 const navItems = [
   { href: '#hero', 'data-page': 'hero', icon: Home, label: 'HOME' },
@@ -31,12 +31,8 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    const dataPage = e.currentTarget.getAttribute('data-page')
-    if (dataPage) {
-      setActiveSection(dataPage)
-    }
+  const handleNavClick = (dataPage: string) => {
+    setActiveSection(dataPage)
   }
 
   const navContainerVariants = {
@@ -91,11 +87,11 @@ export default function Navbar() {
         >
           <div className="flex justify-around items-center h-16 px-4">
             {navItems.map((item) => (
-              <NavItem
+              <NavItem 
                 key={item.href}
                 {...item}
                 isActive={activeSection === item['data-page']}
-                onClick={handleNavClick}
+                onClick={() => handleNavClick(item['data-page'])}
               />
             ))}
           </div>
@@ -116,11 +112,11 @@ export default function Navbar() {
           transition={{ duration: 0.5 }}
         >
           {navItems.map((item) => (
-            <NavItem
+            <NavItem 
               key={item.href}
               {...item}
               isActive={activeSection === item['data-page']}
-              onClick={handleNavClick}
+              onClick={() => handleNavClick(item['data-page'])}
             />
           ))}
         </motion.nav>

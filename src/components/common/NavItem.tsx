@@ -9,18 +9,22 @@ interface NavItemProps {
   label: string
   'data-page': string
   isActive: boolean
-  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
+  onClick?: () => void
 }
 
-export function NavItem({ href, 'data-page':dataPage, icon: Icon, label, isActive, onClick }: NavItemProps) {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
+export function NavItem({ 
+  href, 
+  'data-page': dataPage, 
+  icon: Icon, 
+  label, 
+  isActive, 
+  onClick 
+}: NavItemProps) {
+  const handleClick = () => {
     if (onClick) {
-      onClick(e)
+      onClick()
     }
   }
-
-
 
   const itemVariants = {
     initial: { scale: 0.96, opacity: 0 },
@@ -36,16 +40,9 @@ export function NavItem({ href, 'data-page':dataPage, icon: Icon, label, isActiv
   }
 
   return (
-    <motion.a
-      href={href}
+    <motion.div
       onClick={handleClick}
-      data-page={dataPage}
-
-      className={cn(
-        "relative flex flex-col items-center justify-center",
-        "lg:flex-row lg:w-12 lg:h-12",
-        "group transition-all duration-300 select-none"
-      )}
+      className="relative"
       variants={itemVariants}
       initial="initial"
       animate="animate"
@@ -53,21 +50,29 @@ export function NavItem({ href, 'data-page':dataPage, icon: Icon, label, isActiv
       whileTap="tap"
       transition={{
         duration: 0.2,
-        
         ease: [0.43, 0.13, 0.23, 0.96]
       }}
     >
-      {/* Mobile Layout with Enhanced Touch Areas */}
+      {/* Mobile Layout */}
       <div className="lg:hidden touch-manipulation">
         <motion.div 
           className={cn(
             "flex items-center justify-center w-12 h-12 rounded-full transition-colors duration-200",
-            "active:scale-95 transform",
+            "active:scale-95 transform relative overflow-hidden",
             isActive ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
           )}
           whileTap={{ scale: 0.95 }}
         >
-          <Icon className="w-5 h-5" />
+          <Icon className="w-5 h-5 relative z-10" />
+          {isActive && (
+            <motion.span 
+              layoutId="mobile-active-bg"
+              className="absolute inset-0 bg-primary rounded-full"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            />
+          )}
         </motion.div>
         <motion.span
           variants={labelVariants}
@@ -80,24 +85,32 @@ export function NavItem({ href, 'data-page':dataPage, icon: Icon, label, isActiv
         </motion.span>
       </div>
 
-      {/* Desktop Layout with Enhanced Hover Effects */}
-      <div className="hidden lg:block">
+      {/* Desktop Layout */}
+      <div className="hidden lg:block relative">
         <motion.div
           className={cn(
             "relative flex items-center justify-center",
-            "w-12 h-12 group-hover:w-auto",
+            "w-12 h-12 group",
             "transition-all duration-300"
           )}
           whileHover={{ scale: 1.02 }}
         >
-          <motion.div
-            className={cn(
-              "absolute inset-0 rounded-full transition-all duration-300",
-              "w-12 group-hover:w-full",
-              isActive ? "bg-primary" : "bg-gray-100 dark:bg-gray-800"
-            )}
-            layout
-          />
+          {/* Background Expansion */}
+          {isActive && (
+            <motion.div
+              layoutId="desktop-active-bg"
+              className="absolute inset-0 bg-primary rounded-full"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 300, 
+                damping: 20 
+              }}
+            />
+          )}
+
+          {/* Content Container */}
           <motion.div 
             className={cn(
               "relative z-10 flex items-center",
@@ -107,6 +120,7 @@ export function NavItem({ href, 'data-page':dataPage, icon: Icon, label, isActiv
             )}
             layout
           >
+            {/* Icon */}
             <motion.div
               className={cn(
                 "absolute flex items-center justify-center w-6 h-6",
@@ -116,6 +130,8 @@ export function NavItem({ href, 'data-page':dataPage, icon: Icon, label, isActiv
             >
               <Icon className="w-5 h-5" />
             </motion.div>
+
+            {/* Expanded Content */}
             <motion.div
               className={cn(
                 "flex items-center gap-3",
@@ -131,6 +147,6 @@ export function NavItem({ href, 'data-page':dataPage, icon: Icon, label, isActiv
           </motion.div>
         </motion.div>
       </div>
-    </motion.a>
+    </motion.div>
   )
 }

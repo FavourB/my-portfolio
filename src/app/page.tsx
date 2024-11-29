@@ -1,45 +1,65 @@
 'use client'
 import { useActiveSection } from '@/context/ActiveSectionContext'
-import MainLayout from '@/layouts/MainLayout'
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import Hero from '@/app/Hero/page'
 import About from '@/app/About/page'
 import Portfolio from '@/app/Portfolio/page'
 import Blog from '@/app/Blog/page'
 import Contact from '@/app/Contact/page'
-import SectionLayout from '@/layouts/SectionLayout'
-import { useEffect } from 'react'
 
 export default function Home() {
   const { activeSection, setActiveSection } = useActiveSection()
+  const [error, setError] = useState<string | null>(null)
 
-  // Ensure hero section is active on initial load
   useEffect(() => {
-    if (!activeSection) {
-      setActiveSection('hero')
+    try {
+      if (!activeSection) {
+        setActiveSection('hero')
+      }
+      console.log('Active Section:', activeSection)
+    } catch (err) {
+      console.error('Error in section initialization:', err)
+      setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }, [activeSection, setActiveSection])
 
-  if (!activeSection) return null // Prevent flash of content
+  if (error) {
+    return <div>Error: {error}</div>
+  }
+
+  if (!activeSection) {
+    return <div>Loading...</div>
+  }
+
+  const sectionVariants = {
+    initial: { opacity: 0, x: 300 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -300 }
+  }
+
+  const sections = {
+    'hero': Hero,
+    'about': About,
+    'portfolio': Portfolio,
+    'blog': Blog,
+    'contact': Contact
+  }
+
+  const ActiveSection = sections[activeSection as keyof typeof sections]
 
   return (
-    <MainLayout>
-      <div className="relative h-screen">
-        <SectionLayout id="hero" currentActiveSection={activeSection}>
-          <Hero />
-        </SectionLayout>
-        <SectionLayout id="about" currentActiveSection={activeSection}>
-          <About />
-        </SectionLayout>
-        <SectionLayout id="portfolio" currentActiveSection={activeSection}>
-          <Portfolio />
-        </SectionLayout>
-        <SectionLayout id="blog" currentActiveSection={activeSection}>
-          <Blog />
-        </SectionLayout>
-        <SectionLayout id="contact" currentActiveSection={activeSection}>
-          <Contact />
-        </SectionLayout>
-      </div>
-    </MainLayout>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={activeSection}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={sectionVariants}
+        className="min-h-screen overflow-y-auto"
+      >
+        {ActiveSection ? <ActiveSection /> : <div>Section not found</div>}
+      </motion.div>
+    </AnimatePresence>
   )
 }

@@ -163,8 +163,11 @@ export default function About() {
   }
 
   return (
-    <section id="about" className="py-8 md:py-20 overflow-x-hidden">
-      <div className="container px-4 mx-auto">
+    <section 
+    id="about" 
+    className="py-8 md:py-20 overflow-x-hidden min-h-screen pb-24" 
+  >
+    <div className="container px-4 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

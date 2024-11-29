@@ -15,12 +15,17 @@ export default function MainLayout({ children, className }: MainLayoutProps) {
   return (
     <ThemeProvider>
       <ActiveSectionProvider>
-        <div className={cn("relative min-h-screen", className)}>
+        <div 
+          className={cn(
+            "relative min-h-screen overflow-x-hidden overflow-y-auto", 
+            className
+          )}
+        ><CustomCursor />
           <Navbar />
-          <CustomCursor />
-          <main>
+          
+          <main className="overflow-y-auto">
             {children}
-          </main>
+          </main><CustomCursor />
         </div>
       </ActiveSectionProvider>
     </ThemeProvider>
