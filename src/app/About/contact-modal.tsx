@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Mail, ExternalLink, Github, Twitter } from 'lucide-react';
 
+
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;

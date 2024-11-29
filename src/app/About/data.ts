@@ -6,6 +6,8 @@ interface Skill {
   
   interface PersonalInfo {
     [key: string]: string;
+    email: string;
+    LinkedIn: string;
   }
   
   interface Stat {
