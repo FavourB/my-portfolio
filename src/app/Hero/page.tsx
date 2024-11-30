@@ -1,3 +1,4 @@
+'use client'
 import React, { useState, useEffect, ReactNode } from 'react';
 import { motion, AnimatePresence, useTransform, useViewportScroll } from 'framer-motion';
 import { 
@@ -60,7 +61,7 @@ const SocialLinks = () => {
     },
     { 
       Icon: Github, 
-      href: "https://github.com/favourbawa", 
+      href: "https://github.com/FavourB", 
       color: "bg-gray-100 dark:bg-gray-900/30",
       hoverColor: "hover:bg-gray-200 dark:hover:bg-gray-900/50",
       iconColor: "text-gray-800 dark:text-gray-300",
@@ -68,7 +69,7 @@ const SocialLinks = () => {
     },
     { 
       Icon: Twitter, 
-      href: "https://twitter.com/favourbawa", 
+      href: "https://www.upwork.com/freelancers/~01a6f25e401b07c37c", 
       color: "bg-sky-100 dark:bg-sky-900/30",
       hoverColor: "hover:bg-sky-200 dark:hover:bg-sky-900/50",
       iconColor: "text-sky-600 dark:text-sky-300",
