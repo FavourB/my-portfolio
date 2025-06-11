@@ -3,30 +3,26 @@
 import { useState, useEffect } from 'react'
 
 export function useActiveSection() {
-  const [activeSection, setActiveSection] = useState<string>('home')
+  const [activeSection, setActiveSection] = useState<string>('hero')
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            setActiveSection(entry.target.id)
-          }
-        })
-      },
-      {
-        threshold: 0.5,
-      }
-    )
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '') || 'hero'
+      setActiveSection(hash)
+    }
 
-    const sections = document.querySelectorAll('section[id]')
-    sections.forEach((section) => observer.observe(section))
+    handleHashChange() // Set initial active section based on URL hash
+    window.addEventListener('hashchange', handleHashChange)
 
     return () => {
-      sections.forEach((section) => observer.unobserve(section))
+      window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
 
-  return activeSection
+  const changeSection = (sectionId: string) => {
+    console.log('Changing section to:', sectionId)
+    window.history.pushState(null, '', `#${sectionId}`)
+    setActiveSection(sectionId)
+  }
+  return { activeSection, changeSection }
 }
-
