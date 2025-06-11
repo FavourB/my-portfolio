@@ -1,114 +1,157 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { motion, useSpring, useMotionValue } from 'framer-motion'
 
-export default function CustomCursor() {
-  const [isHovering, setIsHovering] = useState(false)
+interface CursorProps {
+  zIndex?: number
+}
+
+export const CustomCursor: React.FC<CursorProps> = ({ zIndex = 9999 }) => {
   const [isMobile, setIsMobile] = useState(false)
-  
+  const [isClient, setIsClient] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
+
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
-  
-  const springConfig = { damping: 35, stiffness: 300 }
+
+  const springConfig = useMemo(() => ({ 
+    damping: 20, 
+    stiffness: 300, 
+    mass: 0.2 
+  }), [])
+
   const cursorXSpring = useSpring(cursorX, springConfig)
   const cursorYSpring = useSpring(cursorY, springConfig)
 
-  // Mobile and touch detection
+  // Detect mobile devices more robustly
   const checkMobile = useCallback(() => {
-    setIsMobile(
-      window.innerWidth <= 768 || 
-      'ontouchstart' in window || 
-      navigator.maxTouchPoints > 0
-    )
+    const mobileCheck = 
+      typeof window !== 'undefined' && (
+        'ontouchstart' in window || 
+        navigator.maxTouchPoints > 0 || 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      )
+    
+    return mobileCheck
+  }, [])
+
+  // Store the mouse position in a ref to prevent excess re-renders
+  const mousePos = useRef({ x: -100, y: -100 })
+
+  // Optimized mouse move handler using requestAnimationFrame
+  const moveCursor = useCallback((e: MouseEvent) => {
+    mousePos.current.x = e.clientX
+    mousePos.current.y = e.clientY
+  }, [])
+
+  const updateCursorPosition = useCallback(() => {
+    cursorX.set(mousePos.current.x)
+    cursorY.set(mousePos.current.y)
+    requestAnimationFrame(updateCursorPosition)
+  }, [cursorX, cursorY])
+
+  // Hover detection with a more comprehensive selector
+  const handleHoverStart = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    const isInteractive = 
+      target.tagName === 'BUTTON' || 
+      target.tagName === 'A' || 
+      target.getAttribute('role') === 'button' ||
+      target.closest('button, a, [role="button"], .interactive')
+    
+    setIsHovering(!!isInteractive)
+  }, [])
+
+  const handleHoverEnd = useCallback(() => {
+    setIsHovering(false)
   }, [])
 
   useEffect(() => {
-    // Initial mobile check
-    checkMobile()
+    // Ensure this only runs on client
+    setIsClient(true)
     
-    // Add resize listener
-    window.addEventListener('resize', checkMobile)
+    // Mobile detection
+    setIsMobile(checkMobile())
+  }, [checkMobile])
 
-    // If mobile, exit early
-    if (isMobile) return () => window.removeEventListener('resize', checkMobile)
+  useEffect(() => {
+    // Only attach listeners if not mobile and on client
+    if (!isMobile && isClient) {
+      window.addEventListener('mousemove', moveCursor)
+      document.addEventListener('mouseover', handleHoverStart, true)
+      document.addEventListener('mouseout', handleHoverEnd, true)
 
-    let timeoutId: NodeJS.Timeout
+      // Disable default cursor
+      document.body.style.cursor = 'none'
 
-    const moveCursor = (e: MouseEvent) => {
-      cursorX.set(e.clientX - 8)
-      cursorY.set(e.clientY - 8)
-    }
+      requestAnimationFrame(updateCursorPosition) // Start the animation frame loop
 
-    const handleInteraction = (e: MouseEvent) => {
-      // Clear any existing timeout
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
-
-      const target = e.target as HTMLElement
-      
-      // Expanded interactive element detection
-      const isInteractive = 
-        target.closest('nav') ||
-        target.closest('button') ||
-        target.closest('a') ||
-        target.onclick !== null ||
-        target.getAttribute('role') === 'button' ||
-        target.closest('[data-interactive="true"]')
-
-      // Set hover state based on interaction
-      setIsHovering(!!isInteractive)
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      moveCursor(e)
-      handleInteraction(e)
-    }
-
-    const handleMouseLeave = () => {
-      timeoutId = setTimeout(() => {
-        setIsHovering(false)
-      }, 100)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseleave', handleMouseLeave)
-
-    return () => {
-      window.removeEventListener('resize', checkMobile)
-      window.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseleave', handleMouseLeave)
-      if (timeoutId) {
-        clearTimeout(timeoutId)
+      return () => {
+        window.removeEventListener('mousemove', moveCursor)
+        document.removeEventListener('mouseover', handleHoverStart)
+        document.removeEventListener('mouseout', handleHoverEnd)
+        
+        // Restore default cursor
+        document.body.style.cursor = 'auto'
       }
     }
-  }, [cursorX, cursorY, isMobile, checkMobile])
+  }, [isMobile, isClient, moveCursor, handleHoverStart, handleHoverEnd, updateCursorPosition])
 
-  // Render nothing on mobile
-  if (isMobile) return null
+  // No render if mobile or not client-side
+  if (isMobile || !isClient) return null
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 pointer-events-none mix-blend-difference z-[9999]"
-      style={{
-        x: cursorXSpring,
-        y: cursorYSpring,
-      }}
-    >
+    <>
+      {/* Main large cursor circle */}
       <motion.div
-        className="relative flex items-center justify-center"
-        animate={{
-          scale: isHovering ? 1.5 : 1,
-        }}
-        transition={{ 
-          duration: 0.2,
-          ease: [0.43, 0.13, 0.23, 0.96]
+        className="fixed pointer-events-none mix-blend-difference"
+        style={{
+          x: cursorXSpring,
+          y: cursorYSpring,
+          zIndex,
+          top: 0,
+          left: 0,
+          transform: `translateX(${cursorXSpring.get()}px) translateY(${cursorYSpring.get()}px)`
         }}
       >
-        <div className="absolute w-4 h-4 bg-white rounded-full opacity-30 blur-sm" />
-        <div className="w-3 h-3 bg-white rounded-full" />
+        <motion.div
+          className="relative flex items-center justify-center"
+          animate={{
+            scale: isHovering ? 1.7 : 1,
+            opacity: isHovering ? 0.75 : 1,
+          }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          <motion.div 
+            className="absolute w-10 h-10 bg-primary rounded-full opacity-20"
+            animate={{ scale: isHovering ? 1.3 : 1 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          />
+          <motion.div 
+            className="w-5 h-5 bg-primary rounded-full"
+            animate={{ scale: isHovering ? 0.8 : 1 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          />
+        </motion.div>
       </motion.div>
-    </motion.div>
+
+      {/* Small cursor dot */}
+      <motion.div
+        className="fixed pointer-events-none mix-blend-difference"
+        style={{
+          x: cursorX,
+          y: cursorY,
+          zIndex: zIndex - 1,
+          top: 0,
+          left: 0,
+          transform: `translateX(${cursorX.get()}px) translateY(${cursorY.get()}px)`
+        }}
+      >
+        <div className="w-3 h-3 bg-primary rounded-full opacity-60" />
+      </motion.div>
+    </>
   )
 }
+
+export default CustomCursor
